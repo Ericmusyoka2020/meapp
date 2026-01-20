@@ -2,101 +2,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sigh</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Sigh</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f5576c">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f5576c">
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: system-ui, sans-serif;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+body {
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .card {
-            background: #fff;
-            padding: 2.5rem;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-            position: relative;
-        }
+.card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    position: relative;
+}
 
-        .logo {
-            position: absolute;
-            top: 18px;
-            left: 18px;
-            height: 36px;
-        }
+.logo {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    height: 36px;
+}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
+h1 { text-align: center; margin-bottom: 1.5rem; }
 
-        .message {
-            padding: 14px;
-            margin-bottom: 1rem;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 500;
-        }
+.message {
+    padding: 14px;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+}
 
-        .error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8181;
-        }
+.error {
+    background: #fed7d7;
+    color: #742a2a;
+    border: 1px solid #fc8181;
+}
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-        }
+label { display: block; margin-bottom: 0.5rem; }
 
-        input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 2px solid #ddd;
-            margin-bottom: 1.2rem;
-        }
+input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid #ddd;
+    margin-bottom: 1.2rem;
+}
 
-        button {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: none;
-            background: #f5576c;
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-        }
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: #f5576c;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+}
 
-        button:disabled {
-            background: #aaa;
-        }
+button:disabled { background: #aaa; }
 
-        .link {
-            text-align: center;
-            margin-top: 1.5rem;
-        }
+.link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
 
-        .link a {
-            color: #f5576c;
-            text-decoration: none;
-            font-weight: 500;
-        }
-    </style>
+.link a {
+    color: #f5576c;
+    text-decoration: none;
+    font-weight: 500;
+}
+</style>
 </head>
 
 <body>
@@ -104,13 +95,14 @@
 
     <img src="logo.png" class="logo">
 
+    <!-- OFFLINE MESSAGE -->
     <div id="offlineNotice" class="message error" style="display:none;">
         You are offline. Please connect to the internet.
     </div>
 
     <h1>Login</h1>
 
-    <form id="loginForm">
+    <form>
         <label>Username</label>
         <input type="text" required>
 
@@ -120,6 +112,7 @@
         <button id="submitBtn">Login</button>
     </form>
 
+    <!-- LINK (HIDDEN OFFLINE) -->
     <div class="link" id="signupLink">
         <a href="https://payment.intasend.com/pay/ce77dbb6-1cfc-46cc-a4ac-d3857a83285f/">
             Create New Account
@@ -128,29 +121,30 @@
 </div>
 
 <script>
-    const offlineNotice = document.getElementById("offlineNotice");
-    const signupLink = document.getElementById("signupLink");
-    const submitBtn = document.getElementById("submitBtn");
+const offlineNotice = document.getElementById("offlineNotice");
+const signupLink = document.getElementById("signupLink");
+const submitBtn = document.getElementById("submitBtn");
 
-    function updateStatus() {
-        if (!navigator.onLine) {
-            offlineNotice.style.display = "block";
-            signupLink.style.display = "none";
-            submitBtn.disabled = true;
-        } else {
-            offlineNotice.style.display = "none";
-            signupLink.style.display = "block";
-            submitBtn.disabled = false;
-        }
+function updateStatus() {
+    if (!navigator.onLine) {
+        offlineNotice.style.display = "block";
+        signupLink.style.display = "none";
+        submitBtn.disabled = true;
+    } else {
+        offlineNotice.style.display = "none";
+        signupLink.style.display = "block";
+        submitBtn.disabled = false;
     }
+}
 
-    updateStatus();
-    window.addEventListener("online", updateStatus);
-    window.addEventListener("offline", updateStatus);
+updateStatus();
+window.addEventListener("online", updateStatus);
+window.addEventListener("offline", updateStatus);
 
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js");
-    }
+// Register Service Worker
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+}
 </script>
 </body>
 </html>
