@@ -73,9 +73,10 @@ button {
     color: #fff;
     font-size: 16px;
     font-weight: bold;
+    cursor: pointer;
 }
 
-button:disabled { background: #aaa; }
+button:disabled { background: #aaa; cursor: not-allowed; }
 
 .link {
     text-align: center;
@@ -100,19 +101,23 @@ button:disabled { background: #aaa; }
         You are offline. Please connect to the internet.
     </div>
 
+    <!-- LOGIN ERROR -->
+    <div id="loginError" class="message error" style="display:none;">
+        Invalid username or password
+    </div>
+
     <h1>Login</h1>
 
-    <form>
+    <form id="loginForm">
         <label>Username</label>
-        <input type="text" required>
+        <input type="text" id="username" required>
 
         <label>Password</label>
-        <input type="password" required>
+        <input type="password" id="password" required>
 
-        <button id="submitBtn">Login</button>
+        <button id="submitBtn" type="submit">Login</button>
     </form>
 
-    <!-- LINK (HIDDEN OFFLINE) -->
     <div class="link" id="signupLink">
         <a href="https://payment.intasend.com/pay/ce77dbb6-1cfc-46cc-a4ac-d3857a83285f/">
             Create New Account
@@ -124,6 +129,8 @@ button:disabled { background: #aaa; }
 const offlineNotice = document.getElementById("offlineNotice");
 const signupLink = document.getElementById("signupLink");
 const submitBtn = document.getElementById("submitBtn");
+const loginForm = document.getElementById("loginForm");
+const loginError = document.getElementById("loginError");
 
 function updateStatus() {
     if (!navigator.onLine) {
@@ -141,9 +148,26 @@ updateStatus();
 window.addEventListener("online", updateStatus);
 window.addEventListener("offline", updateStatus);
 
-// Register Service Worker
+// LOGIN HANDLER
+loginForm.addEventListener("submit", function (e) {
+    e.preventDefault(); // 🔴 IMPORTANT: stops reload
+
+    if (!navigator.onLine) return;
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // ✅ DEMO LOGIN CHECK (replace with real backend later)
+    if (username === "admin" && password === "1234") {
+        window.location.href = "dashboard.html"; // REQUIRED FILE
+    } else {
+        loginError.style.display = "block";
+    }
+});
+
+// Service Worker
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js");
+    navigator.serviceWorker.register("sw.js");
 }
 </script>
 </body>
