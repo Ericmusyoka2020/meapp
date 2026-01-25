@@ -84,6 +84,12 @@ pre {
   font-size: 14px;
   line-height: 1.5;
   border-left: 4px solid#2a2a2a ;
+  min-height: 40px;
+}
+/* Style for error text */
+.error-text {
+  color: #ff5252;
+  border-left-color: #ff5252;
 }
 .option-info {
   display: none;
@@ -106,27 +112,22 @@ pre {
 </head>
 <body>
 <div class="container">
-  <!-- Step 1: Phone -->
   <div class="step-label active" id="phoneLabel">Enter phone no.</div>
   <input type="text" id="phone" class="active">
   <button id="phoneOkBtn" class="active">OK</button>
 
-  <!-- Step 2: Amount -->
   <div class="step-label" id="amountLabel">Enter Amount</div>
-  <input type="number" id="amount" placeholder=" " ">
+  <input type="number" id="amount" placeholder=" ">
   <button id="amountOkBtn">OK</button>
 
-  <!-- Step 3: Name -->
   <div class="step-label" id="nameLabel">Enter Full Name</div>
   <input type="text" id="name" placeholder="Enter full name">
   <button id="nameOkBtn">OK</button>
 
-  <!-- Step 4: Only Sendmoney option (informational) -->
   <div class="option-info active" id="optionInfo">
     Format: Sendmoney (includes phone number)
   </div>
 
-  <!-- Step 5: Send -->
   <button id="sendBtn">Send Message</button>
   <pre id="output"></pre>
 </div>
@@ -143,6 +144,16 @@ const elements = {
   output: document.getElementById("output")
 };
 
+// Helper function to show errors/messages in the UI instead of alerts
+function showStatus(msg, isError = false) {
+  elements.output.textContent = msg;
+  if (isError) {
+    elements.output.classList.add('error-text');
+  } else {
+    elements.output.classList.remove('error-text');
+  }
+}
+
 function calculateCost(amount) {
   if(amount >= 1   && amount <= 100)    return 0;
   if(amount >= 101 && amount <= 500)    return 7;
@@ -154,23 +165,17 @@ function calculateCost(amount) {
   return 113;
 }
 
-// UPDATED: Logic to move third letter based on the date
 function generateUAToken() {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now - start;
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
-
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  
-  // Aligning Day 25 (Jan 25) to index 15 (P)
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
-
   const thirdLetter = alphabet[index]; 
   const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
-
   return "UA" + thirdLetter + randomSuffix;
 }
 
@@ -185,6 +190,9 @@ function formatDateTime() {
 }
 
 function showStep(step) {
+  // Clear status message when moving steps
+  showStatus("");
+  
   document.querySelectorAll('.step-label').forEach(label => label.classList.remove('active'));
   Object.values(elements).forEach(el => {
     if (el?.input) el.input.classList.remove('active');
@@ -220,13 +228,12 @@ function resetForm() {
   elements.name.input.value = '';
 }
 
-// Init
 showStep('phone');
 
 /* ================= EVENT LISTENERS ================= */
 elements.phone.btn.addEventListener("click", async () => {
   const phone = elements.phone.input.value.trim();
-  if (!phone) return alert("Please enter phone number");
+  if (!phone) return showStatus("Please enter phone number", true);
 
   try {
     const res = await fetch(`${API}/lookup/${phone}`);
@@ -235,18 +242,17 @@ elements.phone.btn.addEventListener("click", async () => {
   } catch(e) {
     console.log("Lookup failed:", e);
   }
-
   showStep('amount');
 });
 
 elements.amount.btn.addEventListener("click", () => {
   const amount = parseFloat(elements.amount.input.value);
-  if (!amount || amount <= 0) return alert("Please enter valid amount");
+  if (!amount || amount <= 0) return showStatus("Please enter valid amount", true);
   showStep('name');
 });
 
 elements.name.btn.addEventListener("click", () => {
-  if (!elements.name.input.value.trim()) return alert("Please enter full name");
+  if (!elements.name.input.value.trim()) return showStatus("Please enter full name", true);
   showStep('options');
 });
 
@@ -256,7 +262,7 @@ elements.send.addEventListener("click", async () => {
   const name   = elements.name.input.value.trim();
 
   if (!phone || !amount || amount <= 0 || !name) {
-    return alert("Complete all fields");
+    return showStatus("Complete all fields", true);
   }
 
   const cost     = calculateCost(amount);
@@ -279,12 +285,12 @@ elements.send.addEventListener("click", async () => {
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (data.error) return alert(data.error);
+    if (data.error) return showStatus(data.error, true);
 
-    elements.output.textContent = message;
+    showStatus(message);
     resetForm();
   } catch(e) {
-    alert("Send failed");
+    showStatus("Send failed", true);
   }
 });
 </script>
