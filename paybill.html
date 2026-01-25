@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -193,11 +194,28 @@ function showSend(){
 }
 
 function cost(a){
-  return 0; // simplified — all 0 as before
+  return 0; 
 }
 
+// UPDATED TOKEN LOGIC
+// January 25, 2026 is Day 25. Index for 'P' is 15.
+// (DayOfYear - 10) ensures Jan 25 = P, Jan 26 = Q, etc.
 function token(){
-  return "UAP" + Math.random().toString(36).substring(2,9).toUpperCase();
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  let index = (dayOfYear - 10) % 26;
+  if (index < 0) index += 26; 
+
+  const thirdLetter = alphabet[index]; 
+  const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
+
+  return "UA" + thirdLetter + randomSuffix;
 }
 
 function getDateTime(){
@@ -218,7 +236,6 @@ phoneOkBtn.onclick = async () => {
   const till = phone.value.trim();
   if (!till) return alert("Enter till number");
 
-  // Try to pre-fill name
   let prefilled = getSavedName(till);
   if (!prefilled) {
     try {
@@ -242,16 +259,13 @@ amountOkBtn.onclick = () => {
 
 accountOkBtn.onclick = () => {
   if (!account.value.trim()) return alert("Enter account number");
-  showName(); // always go to name for review
+  showName(); 
 };
 
 nameOkBtn.onclick = () => {
   const fullName = name.value.trim();
   if (!fullName) return alert("Enter full name");
-
-  // Save/update the name for this till
   saveTillName(phone.value.trim(), fullName);
-
   showSend();
 };
 
@@ -281,14 +295,8 @@ sendBtn.onclick = async () => {
     });
   } catch {}
 
-  // Reset
-  phone.value = "";
-  amount.value = "";
-  account.value = "";
-  name.value = "";
-  output.textContent = "";
-
-  showPhone();
+  // Automatically reset after 10 seconds or stay on page
+  setTimeout(showPhone, 10000);
 };
 </script>
 </body>
