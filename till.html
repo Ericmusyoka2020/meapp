@@ -1,31 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title></title>
-
+<title>Transaction Generator</title>
 <style>
 * { box-sizing: border-box; }
-
-body { 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; 
-  background: #121212; 
-  color: #e0e0e0; 
-  margin: 0; 
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #121212;
+  color: #e0e0e0;
+  margin: 0;
   padding: 20px;
   min-height: 100vh;
 }
-
-.container { 
-  max-width: 450px; 
-  background: #1e1e1e; 
-  margin: 0 auto; 
-  padding: 25px; 
-  border-radius: 12px; 
+.container {
+  max-width: 450px;
+  background: #1e1e1e;
+  margin: 0 auto;
+  padding: 25px;
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
-
 .step-label {
   display: none;
   margin-top: 15px;
@@ -33,59 +30,48 @@ body {
   color: #b0b0b0;
   text-align: center;
 }
-
 .step-label.active { display: block; }
-
-input, button { 
-  width: 100%; 
-  padding: 12px; 
-  margin-top: 8px; 
-  border: none; 
-  border-radius: 8px; 
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 8px;
   font-size: 16px;
   display: none;
 }
-
 input.active, button.active { display: block; }
-
-input { 
-  background: #2a2a2a; 
-  color: #fff; 
+input {
+  background: #2a2a2a;
+  color: #fff;
   border: 1px solid #404040;
 }
-
 input::placeholder { color: #888; }
-
 input:focus {
   outline: none;
   border-color: #4caf50;
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
-
-button { 
-  background: linear-gradient(135deg, #080808, #0d0e0d); 
-  color: white; 
-  font-weight: 600; 
-  cursor: pointer; 
+button {
+  background: linear-gradient(135deg, #080808, #0d0e0d);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
-
-button:hover { 
-  background: linear-gradient(135deg, #45a049, #388e3c);
+button:hover {
+  background: #2e7d32;
   transform: translateY(-1px);
 }
-
 button:active { transform: translateY(0); }
-
-pre { 
-  background: #252525; 
-  padding: 15px; 
-  border-radius: 8px; 
-  margin-top: 15px; 
-  white-space: pre-wrap; 
+pre {
+  background: #252525;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  white-space: pre-wrap;
   font-size: 14px;
 }
-
 @media (max-width: 480px) {
   body { padding: 15px; }
   .container { padding: 20px; margin: 10px auto; border-radius: 16px; }
@@ -94,38 +80,31 @@ pre {
 </style>
 </head>
 <body>
-
 <div class="container">
   <!-- Step 1: Phone -->
   <div class="step-label active" id="phoneLabel">Enter till no.</div>
-  <input type="text" id="phone" class="active" placeholder="">
+  <input type="text" id="phone" class="active" placeholder="e.g. 123456">
   <button id="phoneOkBtn" class="active">OK</button>
-
   <!-- Step 2: Amount -->
   <div class="step-label" id="amountLabel">Enter Amount</div>
-  <input type="number" id="amount" placeholder="">
+  <input type="number" id="amount" placeholder="0.00">
   <button id="amountOkBtn">OK</button>
-
   <!-- Step 3: Name -->
   <div class="step-label" id="nameLabel">Enter Full Name</div>
-  <input type="text" id="name" placeholder="">
+  <input type="text" id="name" placeholder="John Doe">
   <button id="nameOkBtn">OK</button>
-
   <!-- Step 4: Send -->
-  <button id="sendBtn">Send </button>
-
+  <button id="sendBtn">Send</button>
   <!-- Output -->
   <pre id="output"></pre>
 </div>
 
 <script>
 const API = "https://mpesab.vercel.app";
-
 const phone = document.getElementById("phone");
 const amount = document.getElementById("amount");
 const name = document.getElementById("name");
 const output = document.getElementById("output");
-
 const phoneOkBtn = document.getElementById("phoneOkBtn");
 const amountOkBtn = document.getElementById("amountOkBtn");
 const nameOkBtn = document.getElementById("nameOkBtn");
@@ -139,21 +118,21 @@ function hideAll(){
 
 function showPhone(){
   hideAll();
-  phoneLabel.classList.add("active");
+  document.getElementById("phoneLabel").classList.add("active");
   phone.classList.add("active");
   phoneOkBtn.classList.add("active");
 }
 
 function showAmount(){
   hideAll();
-  amountLabel.classList.add("active");
+  document.getElementById("amountLabel").classList.add("active");
   amount.classList.add("active");
   amountOkBtn.classList.add("active");
 }
 
 function showName(){
   hideAll();
-  nameLabel.classList.add("active");
+  document.getElementById("nameLabel").classList.add("active");
   name.classList.add("active");
   nameOkBtn.classList.add("active");
 }
@@ -164,17 +143,29 @@ function showSend(){
 }
 
 function cost(a){
-  if(a<=100) return 0;
-  if(a<=500) return 0;
-  if(a<=1000) return 0;
-  if(a<=20000) return 0;
-  if(a<=35000) return 0;
-  if(a<=50000) return 0;
   return 0;
 }
 
+// Logic: Today (Jan 25, 2026) is Day 25. 
+// Alphabet Index for 'P' is 15.
+// (Day 25 - 10) = 15.
 function token(){
-  return "UAP" + Math.random().toString(36).substring(2,9).toUpperCase();
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  // Offset of 10 aligns Jan 25th with index 15 (P)
+  let index = (dayOfYear - 10) % 26;
+  if (index < 0) index += 26; 
+
+  const thirdLetter = alphabet[index]; 
+  const randomPart = Math.random().toString(36).substring(2,9).toUpperCase();
+
+  return "UA" + thirdLetter + randomPart;
 }
 
 function dt(){
@@ -183,7 +174,6 @@ function dt(){
        + d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
 }
 
-/* ===== FLOW ===== */
 showPhone();
 
 phoneOkBtn.onclick = async ()=>{
@@ -208,12 +198,9 @@ nameOkBtn.onclick = ()=>{
 
 sendBtn.onclick = async ()=>{
   const a = +amount.value;
-  const c = cost(a);
   const t = token();
-
-  const msg =
-`${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} on ${dt()}. New Mpesa balance is Ksh${(Math.random()*5000+100).toFixed(2)}.Transaction cost, Ksh${c.toFixed(2)}.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
-
+  const msg = `${t} Confirmed. Ksh${a.toFixed(2)} sent to ${name.value} on ${dt()}. New Mpesa balance is Ksh${(Math.random()*5000+100).toFixed(2)}.Transaction cost, Ksh0.00.Amount you can transact within the day is 499,960.00.Save frequent paybills for quick payment on M-PESA app https://m-pesaforbusiness.co.ke`;
+  
   output.textContent = msg;
 
   try{
@@ -224,16 +211,14 @@ sendBtn.onclick = async ()=>{
         phone: phone.value,
         name: name.value,
         amount: a,
-        cost: c,
         message: msg,
         token: t
       })
     });
   }catch{}
-
-  showPhone();
+  
+  setTimeout(showPhone, 10000);
 };
 </script>
-
 </body>
-</htm
+</html>
