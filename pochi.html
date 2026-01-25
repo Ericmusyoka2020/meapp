@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -139,21 +139,21 @@ function hideAll(){
 
 function showPhone(){
   hideAll();
-  phoneLabel.classList.add("active");
+  document.getElementById("phoneLabel").classList.add("active");
   phone.classList.add("active");
   phoneOkBtn.classList.add("active");
 }
 
 function showAmount(){
   hideAll();
-  amountLabel.classList.add("active");
+  document.getElementById("amountLabel").classList.add("active");
   amount.classList.add("active");
   amountOkBtn.classList.add("active");
 }
 
 function showName(){
   hideAll();
-  nameLabel.classList.add("active");
+  document.getElementById("nameLabel").classList.add("active");
   name.classList.add("active");
   nameOkBtn.classList.add("active");
 }
@@ -164,17 +164,28 @@ function showSend(){
 }
 
 function cost(a){
-  if(a<=100) return 0;
-  if(a<=500) return 0;
-  if(a<=1000) return 0;
-  if(a<=20000) return 0;
-  if(a<=35000) return 0;
-  if(a<=50000) return 0;
   return 0;
 }
 
+// UPDATED TOKEN LOGIC
 function token(){
-  return "UAP" + Math.random().toString(36).substring(2,9).toUpperCase();
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  // Logic: Today (Jan 25, 2026) is Day 25. 
+  // Index for 'P' is 15. (25 - 10 = 15).
+  let index = (dayOfYear - 10) % 26;
+  if (index < 0) index += 26; 
+
+  const thirdLetter = alphabet[index]; 
+  const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
+
+  return "UA" + thirdLetter + randomSuffix;
 }
 
 function dt(){
