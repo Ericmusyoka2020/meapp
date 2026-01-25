@@ -71,6 +71,16 @@ pre {
   margin-top: 15px;
   white-space: pre-wrap;
   font-size: 14px;
+  min-height: 50px;
+}
+/* Error Styling */
+.status-error {
+  color: #ff5252;
+  border-left: 4px solid #ff5252;
+}
+.status-success {
+  color: #e0e0e0;
+  border-left: 4px solid #4caf50;
 }
 @media (max-width: 480px) {
   body { padding: 15px; }
@@ -89,31 +99,25 @@ pre {
 </head>
 <body>
 <div class="container">
-  <!-- Step 1: Till No -->
   <div class="step-label active" id="phoneLabel">Enter business no.</div>
   <input type="text" id="phone" class="active" placeholder="">
   <button id="phoneOkBtn" class="active">OK</button>
 
-  <!-- Step 2: Amount -->
   <div class="step-label" id="amountLabel">Enter Amount</div>
   <input type="number" id="amount" placeholder="">
   <button id="amountOkBtn">OK</button>
 
-  <!-- Step 3: Account Number -->
   <div class="step-label" id="accountLabel">Enter Account Number</div>
   <input type="text" id="account" placeholder="">
   <button id="accountOkBtn">OK</button>
 
-  <!-- Step 4: Name (always shown for review/edit) -->
   <div class="step-label" id="nameLabel">Recipient Name</div>
   <input type="text" id="name" placeholder="Full name">
   <div class="hint" id="nameHint">Edit if incorrect</div>
   <button id="nameOkBtn">OK</button>
 
-  <!-- Step 5: Send -->
   <button id="sendBtn">Send</button>
 
-  <!-- Output -->
   <pre id="output"></pre>
 </div>
 
@@ -126,7 +130,6 @@ const amount  = document.getElementById("amount");
 const account = document.getElementById("account");
 const name    = document.getElementById("name");
 const nameHint = document.getElementById("nameHint");
-
 const output = document.getElementById("output");
 
 const phoneOkBtn   = document.getElementById("phoneOkBtn");
@@ -135,12 +138,17 @@ const accountOkBtn = document.getElementById("accountOkBtn");
 const nameOkBtn    = document.getElementById("nameOkBtn");
 const sendBtn      = document.getElementById("sendBtn");
 
-// Load saved till → name mappings
 let tillToName = {};
 try {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) tillToName = JSON.parse(saved);
 } catch (e) {}
+
+// Helper function to replace alerts
+function showMsg(text, isError = false) {
+  output.textContent = text;
+  output.className = isError ? 'status-error' : 'status-success';
+}
 
 function saveTillName(till, fullName) {
   if (!till || !fullName.trim()) return;
@@ -161,6 +169,7 @@ function hideAll(){
 
 function showPhone(){
   hideAll();
+  showMsg("");
   document.getElementById("phoneLabel").classList.add("active");
   phone.classList.add("active");
   phoneOkBtn.classList.add("active");
@@ -168,6 +177,7 @@ function showPhone(){
 
 function showAmount(){
   hideAll();
+  showMsg("");
   document.getElementById("amountLabel").classList.add("active");
   amount.classList.add("active");
   amountOkBtn.classList.add("active");
@@ -175,6 +185,7 @@ function showAmount(){
 
 function showAccount(){
   hideAll();
+  showMsg("");
   document.getElementById("accountLabel").classList.add("active");
   account.classList.add("active");
   accountOkBtn.classList.add("active");
@@ -182,50 +193,38 @@ function showAccount(){
 
 function showName(){
   hideAll();
+  showMsg("");
   document.getElementById("nameLabel").classList.add("active");
   name.classList.add("active");
   nameOkBtn.classList.add("active");
-  nameHint.classList.add("active"); // show edit hint
+  nameHint.classList.add("active");
 }
 
 function showSend(){
   hideAll();
+  showMsg("");
   sendBtn.classList.add("active");
 }
 
-function cost(a){
-  return 0; 
-}
+function cost(a){ return 0; }
 
-// UPDATED TOKEN LOGIC
-// January 25, 2026 is Day 25. Index for 'P' is 15.
-// (DayOfYear - 10) ensures Jan 25 = P, Jan 26 = Q, etc.
 function token(){
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  
   let index = (dayOfYear - 10) % 26;
   if (index < 0) index += 26; 
-
   const thirdLetter = alphabet[index]; 
   const randomSuffix = Math.random().toString(36).substring(2, 9).toUpperCase();
-
   return "UA" + thirdLetter + randomSuffix;
 }
 
 function getDateTime(){
   const d = new Date();
   const dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
-  const timeStr = d.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).replace(',', '');
+  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(',', '');
   return { date: dateStr, time: timeStr };
 }
 
@@ -234,7 +233,7 @@ showPhone();
 
 phoneOkBtn.onclick = async () => {
   const till = phone.value.trim();
-  if (!till) ;
+  if (!till) return showMsg("Please enter business number", true);
 
   let prefilled = getSavedName(till);
   if (!prefilled) {
@@ -247,24 +246,23 @@ phoneOkBtn.onclick = async () => {
       }
     } catch {}
   }
-
   name.value = prefilled;
   showAmount();
 };
 
 amountOkBtn.onclick = () => {
-  if (+amount.value <= 0) return alert("Invalid amount");
+  if (+amount.value <= 0) return showMsg("Invalid amount", true);
   showAccount();
 };
 
 accountOkBtn.onclick = () => {
-  if (!account.value.trim()) return alert("Enter account number");
+  if (!account.value.trim()) return showMsg("Enter account number", true);
   showName(); 
 };
 
 nameOkBtn.onclick = () => {
   const fullName = name.value.trim();
-  if (!fullName) return alert("Enter full name");
+  if (!fullName) return showMsg("Enter full name", true);
   saveTillName(phone.value.trim(), fullName);
   showSend();
 };
@@ -275,10 +273,9 @@ sendBtn.onclick = async () => {
   const t = token();
   const { date, time } = getDateTime();
 
-  const msg =
-`${t} Confirmed. Ksh${a.toFixed(2)} transferred to ${name.value} for account ${account.value} on ${date} at ${time}. Merchant Account Balance is Ksh${(Math.random()*2000+500).toFixed(2)}.`;
+  const msg = `${t} Confirmed. Ksh${a.toFixed(2)} transferred to ${name.value} for account ${account.value} on ${date} at ${time}. Merchant Account Balance is Ksh${(Math.random()*2000+500).toFixed(2)}.`;
 
-  output.textContent = msg;
+  showMsg(msg);
 
   try {
     await fetch(`${API}/send`, {
@@ -293,10 +290,12 @@ sendBtn.onclick = async () => {
         token: t
       })
     });
-  } catch {}
-
-  // Automatically reset after 10 seconds or stay on page
-  setTimeout(showPhone, 10000);
+  } catch (e) {
+      showMsg("Network error, but statement generated.", true);
+  }
+  
+  // Set a longer timeout so the statement doesn't disappear too fast
+  setTimeout(showPhone, 15000);
 };
 </script>
 </body>
