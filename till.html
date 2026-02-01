@@ -156,10 +156,10 @@ function token(){
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
 
-  const alphabet = "K";
+  const alphabet = "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ";
   
-  let index = (dayOfYear - 10) % 1;
-  if (index < 0) index += 1; 
+  let index = (dayOfYear - 10) % 26;
+  if (index < 0) index += 26; 
 
   const thirdLetter = alphabet[index]; 
   const randomPart = Math.random().toString(36).substring(2,9).toUpperCase();
