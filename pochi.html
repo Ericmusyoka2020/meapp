@@ -174,7 +174,7 @@ function randomBalance() {
   return (Math.random() * 5000 + 100).toFixed(2);
 }
 
-// UPDATED: 12-hour clock with AM/PM
+// FORMATTED FOR 12-HOUR CLOCK (AM/PM ONLY)
 function formatDateTime() {
   const d = new Date();
   const dateStr = `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)}`;
