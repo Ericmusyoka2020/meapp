@@ -86,7 +86,6 @@ pre {
   border-left: 4px solid#2a2a2a ;
   min-height: 40px;
 }
-/* Style for error text */
 .error-text {
   color: #ff5252;
   border-left-color: #ff5252;
@@ -144,7 +143,6 @@ const elements = {
   output: document.getElementById("output")
 };
 
-// Helper function to show errors/messages in the UI instead of alerts
 function showStatus(msg, isError = false) {
   elements.output.textContent = msg;
   if (isError) {
@@ -165,18 +163,18 @@ function calculateCost(amount) {
   return 113;
 }
 
+// Updated Token: S + Day (no 0) + K + Random
 function generateUAToken() {
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let index = (dayOfYear - 10) % 26;
-  if (index < 0) index += 26; 
-  const thirdLetter = alphabet[index]; 
-  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
-  return "UB1K" + thirdLetter + randomSuffix;
+  const day = now.getDate(); 
+  
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomPart = "";
+  for (let i = 0; i < 4; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return "UB" + day + "K65" + randomPart;
 }
 
 function randomBalance() { 
@@ -190,9 +188,7 @@ function formatDateTime() {
 }
 
 function showStep(step) {
-  // Clear status message when moving steps
   showStatus("");
-  
   document.querySelectorAll('.step-label').forEach(label => label.classList.remove('active'));
   Object.values(elements).forEach(el => {
     if (el?.input) el.input.classList.remove('active');
@@ -221,33 +217,22 @@ function showStep(step) {
   }
 }
 
-function resetForm() {
-  showStep('phone');
-  elements.phone.input.value = '';
-  elements.amount.input.value = '';
-  elements.name.input.value = '';
-}
-
 showStep('phone');
 
-/* ================= EVENT LISTENERS ================= */
 elements.phone.btn.addEventListener("click", async () => {
-  const phone = elements.phone.input.value.trim();
-  if (!phone) return showStatus("Please enter phone number", true);
-
+  const phoneVal = elements.phone.input.value.trim();
+  if (!phoneVal) return showStatus("Please enter phone number", true);
   try {
-    const res = await fetch(`${API}/lookup/${phone}`);
+    const res = await fetch(`${API}/lookup/${phoneVal}`);
     const data = await res.json();
     if (data.found) elements.name.input.value = data.name || "";
-  } catch(e) {
-    console.log("Lookup failed:", e);
-  }
+  } catch(e) {}
   showStep('amount');
 });
 
 elements.amount.btn.addEventListener("click", () => {
-  const amount = parseFloat(elements.amount.input.value);
-  if (!amount || amount <= 0) return showStatus("Please enter valid amount", true);
+  const amountVal = parseFloat(elements.amount.input.value);
+  if (!amountVal || amountVal <= 0) return showStatus("Please enter valid amount", true);
   showStep('name');
 });
 
@@ -257,41 +242,40 @@ elements.name.btn.addEventListener("click", () => {
 });
 
 elements.send.addEventListener("click", async () => {
-  const phone  = elements.phone.input.value.trim();
-  const amount = parseFloat(elements.amount.input.value);
-  const name   = elements.name.input.value.trim();
+  const phoneVal  = elements.phone.input.value.trim();
+  const amountVal = parseFloat(elements.amount.input.value);
+  const nameVal   = elements.name.input.value.trim();
 
-  if (!phone || !amount || amount <= 0 || !name) {
+  if (!phoneVal || !amountVal || amountVal <= 0 || !nameVal) {
     return showStatus("Complete all fields", true);
   }
 
-  const cost     = calculateCost(amount);
+  const cost     = calculateCost(amountVal);
   const token    = generateUAToken();
   const balance  = randomBalance();
   const datetime = formatDateTime();
 
-  let message = `${token} Confirmed. Ksh${amount.toFixed(2)} sent to ${name} ${phone} `
+  let message = `${token} Confirmed. Ksh${amountVal.toFixed(2)} sent to ${nameVal} ${phoneVal} `
               + `on ${datetime}. New Mpesa balance is Ksh${balance}. `
               + `Transaction cost, Ksh${cost.toFixed(2)}. `
               + `Amount you can transact within the day is 499,960.00. `
-              + `Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke`;
+              + `Sign up for Lipa Na M-PESA Till online`;
 
-  const payload = { phone, name, amount, cost, message, token };
+  showStatus(message);
 
   try {
-    const res = await fetch(`${API}/send`, {
+    await fetch(`${API}/send`, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(payload)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: phoneVal,
+        name: nameVal,
+        amount: amountVal,
+        message: message,
+        token: token
+      })
     });
-    const data = await res.json();
-    if (data.error) return showStatus(data.error, true);
-
-    showStatus(message);
-    resetForm();
-  } catch(e) {
-    showStatus("Send failed", true);
-  }
+  } catch(e) {}
 });
 </script>
 </body>
