@@ -81,21 +81,19 @@ pre {
 </head>
 <body>
 <div class="container">
-  <!-- Step 1: Phone -->
   <div class="step-label active" id="phoneLabel">Enter till no.</div>
   <input type="text" id="phone" class="active" placeholder="">
   <button id="phoneOkBtn" class="active">OK</button>
-  <!-- Step 2: Amount -->
+  
   <div class="step-label" id="amountLabel">Enter Amount</div>
   <input type="number" id="amount" placeholder="">
   <button id="amountOkBtn">OK</button>
-  <!-- Step 3: Name -->
+  
   <div class="step-label" id="nameLabel">Enter Full Name</div>
   <input type="text" id="name" placeholder="">
   <button id="nameOkBtn">OK</button>
-  <!-- Step 4: Send -->
+  
   <button id="sendBtn">Send</button>
-  <!-- Output -->
   <pre id="output"></pre>
 </div>
 
@@ -142,26 +140,19 @@ function showSend(){
   sendBtn.classList.add("active");
 }
 
-function cost(a){
-  return 0;
-}
-
+// Token logic: S + [Date] + K + [Random]
 function token(){
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const day = now.getDate(); // 1, 2, 3...
   
-  let index = (dayOfYear - 10) % 26;
-  if (index < 0) index += 26; 
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomPart = "";
+  for (let i = 0; i < 4; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
 
-  const thirdLetter = alphabet[index]; 
-  const randomPart = Math.random().toString(36).substring(2,7).toUpperCase();
-
-  return "UB1K" + thirdLetter + randomPart;
+  // If today is the 2nd, result looks like: S2KXXXXXX
+  return "UB" + day + "K65" + randomPart;
 }
 
 function dt(){
@@ -172,7 +163,6 @@ function dt(){
 
 showPhone();
 
-// Alerts removed - function simply returns if value is missing/invalid
 phoneOkBtn.onclick = async ()=>{
   if(!phone.value.trim()) return; 
   try{
