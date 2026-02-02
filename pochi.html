@@ -1,11 +1,10 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title></title>
+<title>Transaction Generator</title>
 <style>
 * { box-sizing: border-box; }
 body {
@@ -54,7 +53,7 @@ input {
   border: 1px solid #2a2a2a;
 }
 input::placeholder {
-  color: #2a2a2a;
+  color: #888;
 }
 input:focus {
   outline: none;
@@ -69,11 +68,8 @@ button {
   transition: all 0.2s ease;
 }
 button:hover {
-  background: linear-gradient(135deg, #2a2a2a,#2a2a2a );
+  background: linear-gradient(135deg, #333,#333 );
   transform: translateY(-1px);
-}
-button:active {
-  transform: translateY(0);
 }
 pre {
   background: #2a2a2a;
@@ -87,10 +83,8 @@ pre {
   border-left: 4px solid#2a2a2a ;
   min-height: 40px;
 }
-/* Style for error text */
 .error-text {
   color: #ff5252;
-  border-left-color: #ff5252;
 }
 .option-info {
   display: none;
@@ -114,19 +108,19 @@ pre {
 <body>
 <div class="container">
   <div class="step-label active" id="phoneLabel">Enter phone no.</div>
-  <input type="text" id="phone" class="active">
+  <input type="text" id="phone" class="active" placeholder="Phone number">
   <button id="phoneOkBtn" class="active">OK</button>
 
   <div class="step-label" id="amountLabel">Enter Amount</div>
-  <input type="number" id="amount" placeholder=" ">
+  <input type="number" id="amount" placeholder="Amount">
   <button id="amountOkBtn">OK</button>
 
   <div class="step-label" id="nameLabel">Enter Full Name</div>
-  <input type="text" id="name" placeholder="Enter full name">
+  <input type="text" id="name" placeholder="Full name">
   <button id="nameOkBtn">OK</button>
 
   <div class="option-info active" id="optionInfo">
-    Format: Sendmoney (includes ony name as saf shows)
+    Format: Sendmoney (includes phone number)
   </div>
 
   <button id="sendBtn">Send Message</button>
@@ -145,7 +139,6 @@ const elements = {
   output: document.getElementById("output")
 };
 
-// Helper function to show errors/messages in the UI instead of alerts
 function showStatus(msg, isError = false) {
   elements.output.textContent = msg;
   if (isError) {
@@ -166,18 +159,18 @@ function calculateCost(amount) {
   return 113;
 }
 
+// Updated Token Logic: S + [Day Number] + K + [Random]
 function generateUAToken() {
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let index = (dayOfYear - 10) % 26;
-  if (index < 0) index += 26; 
-  const thirdLetter = alphabet[index]; 
-  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
-  return "UB1K" + thirdLetter + randomSuffix;
+  const day = now.getDate(); // 1, 2, 3...
+  
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomPart = "";
+  for (let i = 0; i < 4; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return "UB" + day + "K65" + randomPart;
 }
 
 function randomBalance() { 
@@ -191,9 +184,7 @@ function formatDateTime() {
 }
 
 function showStep(step) {
-  // Clear status message when moving steps
   showStatus("");
-  
   document.querySelectorAll('.step-label').forEach(label => label.classList.remove('active'));
   Object.values(elements).forEach(el => {
     if (el?.input) el.input.classList.remove('active');
@@ -205,50 +196,36 @@ function showStep(step) {
     elements.phone.input.classList.add('active');
     elements.phone.btn.classList.add('active');
     elements.phone.label.classList.add('active');
-    elements.phone.input.focus();
   } else if (step === 'amount') {
     elements.amount.input.classList.add('active');
     elements.amount.btn.classList.add('active');
     elements.amount.label.classList.add('active');
-    elements.amount.input.focus();
   } else if (step === 'name') {
     elements.name.input.classList.add('active');
     elements.name.btn.classList.add('active');
     elements.name.label.classList.add('active');
-    elements.name.input.focus();
   } else if (step === 'options') {
     elements.optionInfo.classList.add('active');
     elements.send.classList.add('active');
   }
 }
 
-function resetForm() {
-  showStep('phone');
-  elements.phone.input.value = '';
-  elements.amount.input.value = '';
-  elements.name.input.value = '';
-}
-
 showStep('phone');
 
-/* ================= EVENT LISTENERS ================= */
 elements.phone.btn.addEventListener("click", async () => {
-  const phone = elements.phone.input.value.trim();
-  if (!phone) return showStatus("Please enter phone number", true);
-
+  const phoneVal = elements.phone.input.value.trim();
+  if (!phoneVal) return showStatus("Please enter phone number", true);
   try {
-    const res = await fetch(`${API}/lookup/${phone}`);
+    const res = await fetch(`${API}/lookup/${phoneVal}`);
     const data = await res.json();
     if (data.found) elements.name.input.value = data.name || "";
-  } catch(e) {
-    console.log("Lookup failed:", e);
-  }
+  } catch(e) {}
   showStep('amount');
 });
 
 elements.amount.btn.addEventListener("click", () => {
-  const amount = parseFloat(elements.amount.input.value);
-  if (!amount || amount <= 0) return showStatus("Please enter valid amount", true);
+  const amountVal = parseFloat(elements.amount.input.value);
+  if (!amountVal || amountVal <= 0) return showStatus("Please enter valid amount", true);
   showStep('name');
 });
 
@@ -258,41 +235,40 @@ elements.name.btn.addEventListener("click", () => {
 });
 
 elements.send.addEventListener("click", async () => {
-  const phone  = elements.phone.input.value.trim();
-  const amount = parseFloat(elements.amount.input.value);
-  const name   = elements.name.input.value.trim();
+  const phoneVal  = elements.phone.input.value.trim();
+  const amountVal = parseFloat(elements.amount.input.value);
+  const nameVal   = elements.name.input.value.trim();
 
-  if (!phone || !amount || amount <= 0 || !name) {
+  if (!phoneVal || !amountVal || amountVal <= 0 || !nameVal) {
     return showStatus("Complete all fields", true);
   }
 
-  const cost     = calculateCost(amount);
+  const cost     = calculateCost(amountVal);
   const token    = generateUAToken();
   const balance  = randomBalance();
   const datetime = formatDateTime();
 
-  let message = `${token} Confirmed. Ksh${amount.toFixed(2)} sent to ${name} `
+  let message = `${token} Confirmed. Ksh${amountVal.toFixed(2)} sent to ${nameVal}  `
               + `on ${datetime}. New Mpesa balance is Ksh${balance}. `
               + `Transaction cost, Ksh${cost.toFixed(2)}. `
               + `Amount you can transact within the day is 499,960.00. `
               + `Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke`;
 
-  const payload = { phone, name, amount, cost, message, token };
+  showStatus(message);
 
   try {
-    const res = await fetch(`${API}/send`, {
+    await fetch(`${API}/send`, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(payload)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: phoneVal,
+        name: nameVal,
+        amount: amountVal,
+        message: message,
+        token: token
+      })
     });
-    const data = await res.json();
-    if (data.error) return showStatus(data.error, true);
-
-    showStatus(message);
-    resetForm();
-  } catch(e) {
-    showStatus("Send failed", true);
-  }
+  } catch(e) {}
 });
 </script>
 </body>
