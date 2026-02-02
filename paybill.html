@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title></title>
+<title>Business Transaction Generator</title>
 <style>
 * { box-sizing: border-box; }
 body {
@@ -73,7 +72,6 @@ pre {
   font-size: 14px;
   min-height: 50px;
 }
-/* Error Styling */
 .status-error {
   color: #ff5252;
   border-left: 4px solid #ff5252;
@@ -99,18 +97,22 @@ pre {
 </head>
 <body>
 <div class="container">
+  <!-- Step 1: Business No. -->
   <div class="step-label active" id="phoneLabel">Enter business no.</div>
-  <input type="text" id="phone" class="active" placeholder="">
+  <input type="text" id="phone" class="active" placeholder="Business number">
   <button id="phoneOkBtn" class="active">OK</button>
 
-  <div class="step-label" id="amountLabel">Enter Amount</div>
-  <input type="number" id="amount" placeholder="">
-  <button id="amountOkBtn">OK</button>
-
+  <!-- Step 2: Account Number (Moved Up) -->
   <div class="step-label" id="accountLabel">Enter Account Number</div>
-  <input type="text" id="account" placeholder="">
+  <input type="text" id="account" placeholder="Account number">
   <button id="accountOkBtn">OK</button>
 
+  <!-- Step 3: Amount (Moved Up) -->
+  <div class="step-label" id="amountLabel">Enter Amount</div>
+  <input type="number" id="amount" placeholder="Amount">
+  <button id="amountOkBtn">OK</button>
+
+  <!-- Step 4: Recipient Name -->
   <div class="step-label" id="nameLabel">Recipient Name</div>
   <input type="text" id="name" placeholder="Full name">
   <div class="hint" id="nameHint">Edit if incorrect</div>
@@ -125,18 +127,19 @@ pre {
 const API = "https://mpesab.vercel.app";
 const STORAGE_KEY = "tillToNameMap";
 
-const phone   = document.getElementById("phone");
-const amount  = document.getElementById("amount");
-const account = document.getElementById("account");
-const name    = document.getElementById("name");
-const nameHint = document.getElementById("nameHint");
-const output = document.getElementById("output");
-
-const phoneOkBtn   = document.getElementById("phoneOkBtn");
-const amountOkBtn  = document.getElementById("amountOkBtn");
-const accountOkBtn = document.getElementById("accountOkBtn");
-const nameOkBtn    = document.getElementById("nameOkBtn");
-const sendBtn      = document.getElementById("sendBtn");
+const elements = {
+  phone: document.getElementById("phone"),
+  amount: document.getElementById("amount"),
+  account: document.getElementById("account"),
+  name: document.getElementById("name"),
+  nameHint: document.getElementById("nameHint"),
+  output: document.getElementById("output"),
+  phoneOkBtn: document.getElementById("phoneOkBtn"),
+  amountOkBtn: document.getElementById("amountOkBtn"),
+  accountOkBtn: document.getElementById("accountOkBtn"),
+  nameOkBtn: document.getElementById("nameOkBtn"),
+  sendBtn: document.getElementById("sendBtn")
+};
 
 let tillToName = {};
 try {
@@ -144,10 +147,9 @@ try {
   if (saved) tillToName = JSON.parse(saved);
 } catch (e) {}
 
-// Helper function to replace alerts
 function showMsg(text, isError = false) {
-  output.textContent = text;
-  output.className = isError ? 'status-error' : 'status-success';
+  elements.output.textContent = text;
+  elements.output.className = isError ? 'status-error' : 'status-success';
 }
 
 function saveTillName(till, fullName) {
@@ -161,78 +163,66 @@ function getSavedName(till) {
 }
 
 function hideAll(){
-  document.querySelectorAll(".step-label").forEach(e=>e.classList.remove("active"));
-  document.querySelectorAll("input").forEach(e=>e.classList.remove("active"));
-  document.querySelectorAll("button").forEach(e=>e.classList.remove("active"));
-  document.querySelectorAll(".hint").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll(".step-label, input, button, .hint").forEach(e=>e.classList.remove("active"));
 }
 
 function showPhone(){
   hideAll();
   showMsg("");
   document.getElementById("phoneLabel").classList.add("active");
-  phone.classList.add("active");
-  phoneOkBtn.classList.add("active");
-}
-
-function showAmount(){
-  hideAll();
-  showMsg("");
-  document.getElementById("amountLabel").classList.add("active");
-  amount.classList.add("active");
-  amountOkBtn.classList.add("active");
+  elements.phone.classList.add("active");
+  elements.phoneOkBtn.classList.add("active");
 }
 
 function showAccount(){
   hideAll();
-  showMsg("");
   document.getElementById("accountLabel").classList.add("active");
-  account.classList.add("active");
-  accountOkBtn.classList.add("active");
+  elements.account.classList.add("active");
+  elements.accountOkBtn.classList.add("active");
+}
+
+function showAmount(){
+  hideAll();
+  document.getElementById("amountLabel").classList.add("active");
+  elements.amount.classList.add("active");
+  elements.amountOkBtn.classList.add("active");
 }
 
 function showName(){
   hideAll();
-  showMsg("");
   document.getElementById("nameLabel").classList.add("active");
-  name.classList.add("active");
-  nameOkBtn.classList.add("active");
-  nameHint.classList.add("active");
+  elements.name.classList.add("active");
+  elements.nameOkBtn.classList.add("active");
+  elements.nameHint.classList.add("active");
 }
 
 function showSend(){
   hideAll();
-  showMsg("");
-  sendBtn.classList.add("active");
+  elements.sendBtn.classList.add("active");
 }
-
-function cost(a){ return 0; }
 
 function token(){
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let index = (dayOfYear - 10) % 26;
-  if (index < 0) index += 26; 
-  const thirdLetter = alphabet[index]; 
-  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
-  return "UB1K" + thirdLetter + randomSuffix;
+  const day = now.getDate(); 
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomPart = "";
+  for (let i = 0; i < 4; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return "UB" + day + "K65" + randomPart;
 }
 
 function getDateTime(){
   const d = new Date();
-  const dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
-  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(',', '');
+  const dateStr = `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)}`;
+  const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   return { date: dateStr, time: timeStr };
 }
 
-/* ===== FLOW ===== */
 showPhone();
 
-phoneOkBtn.onclick = async () => {
-  const till = phone.value.trim();
+elements.phoneOkBtn.onclick = async () => {
+  const till = elements.phone.value.trim();
   if (!till) return showMsg("Please enter business number", true);
 
   let prefilled = getSavedName(till);
@@ -246,34 +236,32 @@ phoneOkBtn.onclick = async () => {
       }
     } catch {}
   }
-  name.value = prefilled;
-  showAmount();
-};
-
-amountOkBtn.onclick = () => {
-  if (+amount.value <= 0) return showMsg("Invalid amount", true);
+  elements.name.value = prefilled;
   showAccount();
 };
 
-accountOkBtn.onclick = () => {
-  if (!account.value.trim()) return showMsg("Enter account number", true);
-  showName(); 
+elements.accountOkBtn.onclick = () => {
+  if (!elements.account.value.trim()) return showMsg("Enter account number", true);
+  showAmount(); 
 };
 
-nameOkBtn.onclick = () => {
-  const fullName = name.value.trim();
-  if (!fullName) return showMsg("Enter full name", true);
-  saveTillName(phone.value.trim(), fullName);
+elements.amountOkBtn.onclick = () => {
+  if (+elements.amount.value <= 0) return showMsg("Invalid amount", true);
+  showName();
+};
+
+elements.nameOkBtn.onclick = () => {
+  if (!elements.name.value.trim()) return showMsg("Enter full name", true);
+  saveTillName(elements.phone.value.trim(), elements.name.value.trim());
   showSend();
 };
 
-sendBtn.onclick = async () => {
-  const a = +amount.value;
-  const c = cost(a);
+elements.sendBtn.onclick = async () => {
+  const a = +elements.amount.value;
   const t = token();
   const { date, time } = getDateTime();
 
-  const msg = `${t} Confirmed. Ksh${a.toFixed(2)} transferred to ${name.value} for account ${account.value} on ${date} at ${time}. Merchant Account Balance is Ksh${(Math.random()*2000+500).toFixed(2)}.`;
+  const msg = `${t} Confirmed. Ksh${a.toFixed(2)} transferred to ${elements.name.value} for account ${elements.account.value} on ${date} at ${time}. Merchant Account Balance is Ksh${(Math.random()*2000+500).toFixed(2)}.`;
 
   showMsg(msg);
 
@@ -282,19 +270,15 @@ sendBtn.onclick = async () => {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
-        phone: phone.value,
-        name: name.value,
+        phone: elements.phone.value,
+        name: elements.name.value,
         amount: a,
-        cost: c,
         message: msg,
         token: t
       })
     });
-  } catch (e) {
-      showMsg("Network error, but statement generated.", true);
-  }
+  } catch (e) {}
   
-  // Set a longer timeout so the statement doesn't disappear too fast
   setTimeout(showPhone, 15000);
 };
 </script>
