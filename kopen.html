@@ -2,40 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Messages</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
-  height: 100%;
-  background: #000;
-  overflow: hidden;
-}
-
+/* svh ensures the container fits when mobile browser bars are fully visible */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #000;
   color: #fff;
+  height: 100vh;
+  height: 100svh; 
   display: flex;
   flex-direction: column;
-  /* dvh adapts to the visible area even when address bars are shown */
-  height: 100dvh; 
+  overflow: hidden;
 }
 
 .messages-header {
   background: #201f1f;
   border-bottom: 1px solid #333;
   padding: 10px 15px;
-  padding-top: calc(10px + env(safe-area-inset-top)); /* Support for notches */
+  /* Adds extra padding for phone notches */
+  padding-top: calc(10px + env(safe-area-inset-top)); 
+  height: auto;
+  min-height: 55px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: auto;
-  min-height: 60px;
-  flex-shrink: 0;
 }
 
-.logo { height: 28px; }
+.logo { height: 26px; }
 
 .page-content {
   flex: 1;
@@ -46,6 +43,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .messages-container {
@@ -58,7 +56,7 @@ body {
 }
 
 .message-bubble {
-  max-width: 90%;
+  max-width: 85%;
   padding: 10px 14px;
   border-radius: 18px;
   font-size: 15px;
@@ -66,18 +64,20 @@ body {
   border: 1px solid rgba(255,255,255,0.08);
   margin-bottom: 8px;
   width: fit-content;
-  word-break: break-word;
+  word-wrap: break-word;
 }
 
 .no-reply-info {
   background: #1a1919;
   color: #aaa;
   font-size: 13px;
-  /* Safe area inset ensures visibility on iPhone home indicators */
-  padding: 15px 15px calc(15px + env(safe-area-inset-bottom)) 15px;
+  /* Extra bottom padding to clear mobile home indicators/tab bars */
+  padding: 15px 15px calc(20px + env(safe-area-inset-bottom)) 15px;
   text-align: center;
   border-top: 1px solid #333;
+  width: 100%;
   flex-shrink: 0;
+  z-index: 999;
   cursor: pointer;
   user-select: none;
 }
@@ -99,6 +99,7 @@ body {
 <script>
 const API = "https://mpesab.vercel.app";
 
+// TRIPLE TAP REDIRECT
 const noReplyBar = document.getElementById('noReplyBar');
 let tapCount = 0;
 let tapTimeout;
@@ -130,7 +131,7 @@ async function loadMessages() {
 
     container.scrollTop = container.scrollHeight;
   } catch (err) {
-    container.innerHTML = `<div style="padding:50px; text-align:center;">Error loading data</div>`;
+    container.innerHTML = `<div style="padding:50px; text-align:center;">Load Error</div>`;
   }
 }
 
