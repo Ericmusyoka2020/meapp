@@ -208,7 +208,7 @@ async function loginAttempt(data){
       sessionStorage.setItem('username', result.username);
       sessionStorage.setItem('userId', result.userId);
       message.innerHTML = '<div class="success">Login successful</div>';
-      setTimeout(()=>location.href='open.html',1200);
+      setTimeout(()=>location.href='kopen.html',1200);
     } else {
       message.innerHTML = `<div class="error">${result.error || 'Invalid login details'}</div>`;
     }
