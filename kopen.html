@@ -5,8 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Messages</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#000000">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -89,21 +87,6 @@ body {
   margin-top: 4px;
   text-align: right;
 }
-.install-btn {
-  position: fixed;
-  bottom: 90px;
-  right: 16px;
-  background: #25d366;
-  color: #000;
-  padding: 14px 18px;
-  border-radius: 30px;
-  font-weight: 600;
-  font-size: 14px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-  cursor: pointer;
-  display: none;
-  z-index: 999;
-}
 .no-reply-info {
   background: #1a1919;
   color: #aaa;
@@ -112,7 +95,7 @@ body {
   text-align: center;
   border-top: 1px solid #333;
   cursor: pointer;
-  user-select: none; /* Prevents text selection during rapid tapping */
+  user-select: none;
 }
 @keyframes slideInUp {
   from { opacity: 0; transform: translateY(30px); }
@@ -125,27 +108,25 @@ body {
 </style>
 </head>
 <body>
+
 <div class="messages-header">
   <img src="logoo.png" class="logo">
   <h1 class="header-title"></h1>
   <div class="more-menu">⋮</div>
 </div>
+
 <div class="page-content">
   <div class="messages-container" id="messages"></div>
-  <!-- Added ID for script access -->
   <div class="no-reply-info" id="noReplyBar">
     You can't reply to this short code. Learn more
   </div>
-</div>
-<div class="install-btn" id="installBtn">
-  <span>⬇️</span> Install App
 </div>
 
 <script>
 const API = "https://mpesab.vercel.app";
 const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
 
-// TRIPLE TAP LOGIC FOR THE BOTTOM BAR
+// TRIPLE TAP LOGIC
 const noReplyBar = document.getElementById('noReplyBar');
 let tapCount = 0;
 let tapTimeout;
@@ -153,12 +134,11 @@ let tapTimeout;
 noReplyBar.addEventListener('click', () => {
     tapCount++;
     clearTimeout(tapTimeout);
-    
     if (tapCount === 3) {
         tapCount = 0;
         window.location.href = 'pi.html';
     } else {
-        tapTimeout = setTimeout(() => { tapCount = 0; }, 400); // Resets if 3 taps don't happen in 400ms
+        tapTimeout = setTimeout(() => { tapCount = 0; }, 400);
     }
 });
 
@@ -208,7 +188,6 @@ async function loadMessages() {
     [...data].reverse().forEach((tx, index) => {
       const bubble = document.createElement("div");
       bubble.className = "message-bubble";
-      
       if(index === data.length - 1) bubble.id = "last-message";
 
       const url = extractFirstUrl(tx.message);
@@ -265,22 +244,6 @@ function removeMessage(el) {
 }
 
 loadMessages();
-
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(() => { document.getElementById("installBtn").style.display = "block"; }, 5000);
-});
-
-document.getElementById("installBtn").addEventListener("click", async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') document.getElementById("installBtn").style.display = "none";
-    deferredPrompt = null;
-  }
-});
 </script>
 </body>
 </html>
